@@ -1,3 +1,4 @@
+//src/materials/ItemInHandColor/fragment.sc
 $input v_color0, v_fog, v_light
 
 #include <bgfx_shader.sh>
@@ -11,12 +12,13 @@ uniform vec4 MatColor;
 uniform vec4 MultiplicativeTintColor;
 
 void main() {
+  
   #if defined(DEPTH_ONLY) || defined(INSTANCING)
-    gl_FragColor = vec4(0.0, 0.0, 0.0, 0.0);
+    gl_FragColor = vec4(0.0);
     return;
   #endif
 
-  vec4 albedo = vec4(mix(vec3(1.0, 1.0, 1.0), v_color0.rgb, ColorBased.x), 1.0);
+   vec4 albedo = vec4(mix(vec3(1.0, 1.0, 1.0), v_color0.rgb, ColorBased.x), 1.0);
 
   #ifdef MULTI_COLOR_TINT
     albedo = applyMultiColorChange(albedo, ChangeColor.rgb, MultiplicativeTintColor.rgb);
@@ -33,10 +35,16 @@ void main() {
     }
   #endif
 
+  bool isGlowing = (v_color0.a <= 0.99);
+
+if (!isGlowing) {
   albedo.rgb *= albedo.rgb * v_light.rgb;
+} else {
+
+  albedo.rgb *= 4.5;
+}
 
   albedo.rgb = mix(albedo.rgb, v_fog.rgb, v_fog.a);
-
   albedo.rgb = colorCorrection(albedo.rgb);
 
   gl_FragColor = albedo;
